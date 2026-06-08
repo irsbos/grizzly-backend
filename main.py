@@ -15,7 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-GRIZZLY_URL = "https://api.grizzly-sms.com/stubs/handler_api.php"
+GRIZZLY_URL = "https://grizzly-sms.com/stubs/handler_api.php"
 
 @app.get("/api/prices")
 def get_prices():
