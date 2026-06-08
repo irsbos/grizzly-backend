@@ -9,7 +9,7 @@ import database
 bot = telebot.TeleBot(config.BOT_TOKEN)
 database.init_db()  # تشغيل وتجهيز قاعدة البيانات تلقائياً
 
-GRIZZLY_URL = "https://grizzly-sms.com/stubs/handler_api.php"
+GRIZZLY_URL = "https://api.grizzlysms.com/stubs/handler_api.php"
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
