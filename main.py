@@ -27,12 +27,18 @@ def get_prices():
         }
         response = requests.get(GRIZZLY_URL, params=params)
         if response.status_code != 200:
-            return {"status": "error", "message": "المزود لا يستجيب حالياً"}
+            return {"status": "error", "message": f"المزود لا يستجيب، رمز الحالة: {response.status_code}"}
         
-        raw_data = response.json()
+        # 🟡 التعديل الأمني هنا: محاولة قراءة البيانات وفحصها إذا تحطمت
+        try:
+            raw_data = response.json()
+        except Exception:
+            # إذا أرسل الموقع صفحة خطأ أو حظر، سيعرض لك السيرفر أول 300 حرف منها فوراً
+            return {"status": "error", "message": f"Grizzly returned non-JSON text: {response.text[:300]}"}
+            
         formatted_list = []
         
-        # تنسيق البيانات وهيكلتها: { country_id: { service_code: { cost: X, count: Y } } }
+        # تنسيق البيانات وهيكلتها الخاصة بك
         for country_id, services in raw_data.items():
             for service_code, details in services.items():
                 cost = float(details.get("cost", 0))
@@ -48,4 +54,4 @@ def get_prices():
                     })
         return {"status": "success", "data": formatted_list}
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        return {"status": "error", "message": f"Server Exception: {str(e)}"}
