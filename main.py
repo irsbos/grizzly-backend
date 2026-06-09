@@ -19,9 +19,21 @@ GRIZZLY_URL = "https://api.grizzlysms.com/stubs/handler_api.php"
 
 @app.get("/api/prices")
 def get_prices():
+    """ جلب الأسعار الحية من Grizzly وإضافة هامش الربح الخاص بك """
     try:
+        import os
+        # 🎯 تعديل ذكي: القراءة من السيرفر مباشرة لقطع الشك باليقين
+        api_key = os.environ.get("GRIZZLY_API_KEY")
+        
+        # فحص إذا كان المفتاح فارغاً أو يحتوي على النص الافتراضي القديم
+        if not api_key or api_key == "YOUR_GRIZZLY_API_KEY" or api_key.strip() == "":
+            return {
+                "status": "error", 
+                "message": "🚨 السيرفر لم يجد المفتاح في إعدادات Render! تأكد من كتابة الاسم بدقة GRIZZLY_API_KEY وضغط Save Changes"
+            }
+
         params = {
-            "api_key": config.GRIZZLY_API_KEY,
+            "api_key": api_key, # استخدام المفتاح المأخوذ مباشرة من السيرفر
             "action": "getPrices"
         }
         response = requests.get(GRIZZLY_URL, params=params)
