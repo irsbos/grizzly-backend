@@ -19,7 +19,6 @@ GRIZZLY_URL = "https://api.grizzlysms.com/stubs/handler_api.php"
 
 @app.get("/api/prices")
 def get_prices():
-    """ جلب الأسعار الحية من Grizzly وإضافة هامش الربح الخاص بك """
     try:
         params = {
             "api_key": config.GRIZZLY_API_KEY,
@@ -29,22 +28,17 @@ def get_prices():
         if response.status_code != 200:
             return {"status": "error", "message": f"المزود لا يستجيب، رمز الحالة: {response.status_code}"}
         
-        # 🟡 التعديل الأمني هنا: محاولة قراءة البيانات وفحصها إذا تحطمت
         try:
             raw_data = response.json()
         except Exception:
-            # إذا أرسل الموقع صفحة خطأ أو حظر، سيعرض لك السيرفر أول 300 حرف منها فوراً
             return {"status": "error", "message": f"Grizzly returned non-JSON text: {response.text[:300]}"}
             
         formatted_list = []
-        
-        # تنسيق البيانات وهيكلتها الخاصة بك
         for country_id, services in raw_data.items():
             for service_code, details in services.items():
                 cost = float(details.get("cost", 0))
                 count = int(details.get("count", 0))
-                
-                if count > 0:  # عرض الخدمات التي تحتوي على أرقام متوفرة فقط
+                if count > 0:
                     final_price = round(cost * config.PROFIT_MARGIN, 2)
                     formatted_list.append({
                         "country": country_id,
