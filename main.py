@@ -1,39 +1,40 @@
-# main.py
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 import requests
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware  # 1. استدعاء أداة السماح بالاتصال
 import config
 
-app = FastAPI(title="Grizzly SMS API Bridge")
+app = FastAPI()
 
-# تفعيل الـ CORS لتمكين واجهة الـ Mini App من الاتصال بالسيرفر دون قيود حماية المتصفح
+# 2. تفعيل الصلاحيات لكي يوافق السيرفر على إرسال الأسعار للتطبيق المصغر
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # يسمح للتطبيق بالوصول للبيانات بدون حظر
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# 3. رابط موقع Grizzly الأساسي
 GRIZZLY_URL = "https://api.grizzlysms.com/stubs/handler_api.php"
 
+# 4. دالة جلب الأسعار وحساب الأرباح التي نجحت معنا
 @app.get("/api/prices")
 def get_prices():
     """ جلب الأسعار الحية من Grizzly وإضافة هامش الربح الخاص بك """
     try:
         import os
-        # 🎯 تعديل ذكي: القراءة من السيرفر مباشرة لقطع الشك باليقين
+        # القراءة من سيرفر Render مباشرة
         api_key = os.environ.get("GRIZZLY_API_KEY")
         
-        # فحص إذا كان المفتاح فارغاً أو يحتوي على النص الافتراضي القديم
+        # فحص إذا كان المفتاح فارغاً
         if not api_key or api_key == "YOUR_GRIZZLY_API_KEY" or api_key.strip() == "":
             return {
                 "status": "error", 
-                "message": "🚨 السيرفر لم يجد المفتاح في إعدادات Render! تأكد من كتابة الاسم بدقة GRIZZLY_API_KEY وضغط Save Changes"
+                "message": "🚨 السيرفر لم يجد المفتاح في إعدادات Render!"
             }
 
         params = {
-            "api_key": api_key, # استخدام المفتاح المأخوذ مباشرة من السيرفر
+            "api_key": api_key,
             "action": "getPrices"
         }
         response = requests.get(GRIZZLY_URL, params=params)
